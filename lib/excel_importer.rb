@@ -56,7 +56,7 @@ private
   def read_cell(cell, type)
     case type
     when :string, :text
-      cell.to_s('utf8').gsub(/[^ \(\)a-zA-Z0-9,\.'"&\/:-]/, '').strip
+      cell.to_s('utf8').gsub(/[^ \(\)a-zA-Z0-9,\.'"&\/:\?_-]/, '').strip
     when :integer
       cell.to_i
     when :date
