@@ -7,6 +7,8 @@ silence_warnings {
 }
 
 class ExcelImporter
+  class ImportException < Exception; end
+  
   def initialize(model)
     @columns = []
     @model = model
@@ -17,16 +19,16 @@ class ExcelImporter
     sheet = Spreadsheet::ParseExcel.parse(filename).worksheet(0)
 
     returning ResultSet.new do |result|
+      row_index = 1
       sheet.each(1) do |row|
-        instance = create_from_row(row)
+        row_index += 1
         
-        if instance.save
-          result.saved << instance
-        else
-          result.unsaved << instance
+        begin
+          instance = create_from_row(row)
+          result.save(instance)
+        rescue Exception => e
+          raise ImportException.new("Import failed at row #{row_index}")
         end
-        
-        result.all << instance
       end
     end
   end
@@ -56,7 +58,7 @@ private
   def read_cell(cell, type)
     case type
     when :string, :text
-      cell.to_s('utf8').gsub(/[^ \(\)a-zA-Z0-9,\.'"&\/:\?_-]/, '').strip
+      cell.to_s('utf8')
     when :integer
       cell.to_i
     when :date
