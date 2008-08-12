@@ -58,7 +58,7 @@ private
   def read_cell(cell, type)
     case type
     when :string, :text
-      cell.to_s('utf8')
+      cell.to_s('utf8').strip
     when :integer
       cell.to_i
     when :date
